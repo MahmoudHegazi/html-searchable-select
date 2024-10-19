@@ -1,6 +1,9 @@
 # html-searchable-select
 html-searchable-select is a JS plugin that converts your HTML multiple select element into a searchable HTML multiple select. Your original select element remains unchanged, allowing you to use any JavaScript code to access the values of the searchable multiple select, no javascript exp required to control or customize the new html multiple select with search generated just labels
 
+# how to start:
+* check examples.html
+* Include the html_multiple_select.js file in your code, then create as many select elements in HTML as you need, in any way you prefer. Finally, create a new instance of HTMLSearchableSelect and provide any DOM selector for the class.
 
 ### Examples:
 ![image](https://github.com/user-attachments/assets/5899bf22-7805-4297-a043-912acf2a4e20)
