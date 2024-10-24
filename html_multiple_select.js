@@ -45,6 +45,9 @@ const HTMLSearchableSelect = (function() {
                 this.minimizedHSSSelector = `#${this.minimizedHSSId}`;
 
 
+                this.selectAllId = `${this.id}_selectall`;
+                this.selectAllSelector = `#${this.selectAllId}`;
+                
 
 
                 this.hiddenClass = `${this.id}_hidden`;
@@ -63,6 +66,9 @@ const HTMLSearchableSelect = (function() {
                 this._counterStyle = select.attr('data-counter-style');
                 this._counter = select.attr('data-counter');
                 this._minimizable = select.attr('data-minimizable');
+                this._selectCheckbox = select.attr('data-select-checkbox');
+                this._selectCheckboxStyle = select.attr('data-select-checkbox-style');
+                this.selectChecked = false;
 
                 /* extra arg */
                 this._extraSearch = select.attr('data-search-extra-attrs');
@@ -108,6 +114,9 @@ const HTMLSearchableSelect = (function() {
             this.contStyle = this.getOptionalVal(this._contStyle, `background:lavender !important;`);
 
             this.counterStyle = this.getOptionalVal(this._counterStyle, '');
+            
+            
+            this.selectCheckboxStyle = this.getOptionalVal(this._selectCheckboxStyle, `background:gainsboro !important;`);
 
             /* 2options only attrs lower level programing */
             if (this._counter || typeof(this._counter) !== 'undefined') {
@@ -131,7 +140,15 @@ const HTMLSearchableSelect = (function() {
                 this.minimizedHSS = '';
                 this.minimizeMr = '';
             }
-
+            
+            /* checkbox to Select/unselect all select items (optional controll to edit select element) */
+            if (this._selectCheckbox || typeof(this._selectCheckbox) !== 'undefined') {
+                this.selectCheckbox = `<div class="m-0 p-1 d-flex justify-content-center align-items-center" style="${this.selectCheckboxStyle}">
+                    <input type="checkbox" class="select_all" id="${this.selectAllId}" title="toggle between 'check all options' and 'uncheck all options.' " />
+                    </div>`;
+            } else {
+                this.selectCheckbox = '';
+            }
 
             /* optional create html label if user set data-label with value */
             let labelStr = this.label || this.name;
@@ -163,6 +180,14 @@ const HTMLSearchableSelect = (function() {
                     this.maximize();
                 });
             }
+            
+            /* toggle between select all checkboxes and unselect all */
+            if ($(this.selectAllSelector).length) {
+                $(this.selectAllSelector).on('change.hss', () => {
+                    this.toggleSelect();
+                });
+            }
+            
 
             /* select change (select element in state change not removed like the search input (show or hide select not removed so here off prev event) */
             if (this.select.length) {
@@ -181,6 +206,7 @@ const HTMLSearchableSelect = (function() {
                 ${this.minimizedHSS} <!-- optional minimizedHSS -->
                 <div class="col-sm-12 row m-0 p-0 minimize_target">
                     <div class="col-sm-12 m-0 p-0 d-flex">
+                        ${this.selectCheckbox}
                         <input type="text" class="form-control ${this.minimizeMr}" id="${this.searchId}" placeholder="${this.searchPlaceholder}" style="${this.searchStyle}" />
                         <!-- optional minimizeBtn -->
                         ${this.minimizeBtn}
@@ -216,6 +242,16 @@ const HTMLSearchableSelect = (function() {
         maximize() {
             $(this.minimizedHSSContSelector).hide();
             this.hss.find('.minimize_target').show();
+        }
+        toggleSelect() {
+
+            if (this.selectChecked) {
+                this.select.find('option:selected').prop('selected', false).end().trigger('change');
+                this.selectChecked = false;
+            } else {
+                this.select.find('option').prop('selected', true).end().trigger('change');
+                this.selectChecked = true;
+            }
         }
         search() {
             console.log('search', this, 'extra attrs foucses:', this.extraSearch);
@@ -290,3 +326,6 @@ const HTMLSearchableSelect = (function() {
     }
     return HTMLSearchableSelect;
 })();
+new HTMLSearchableSelect("#select_orgs");
+new HTMLSearchableSelect("#select_orgs2");
+new HTMLSearchableSelect("#select_orgs3");
