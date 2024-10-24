@@ -21,7 +21,8 @@
 
 
   <h4 class="mt-3">Example 2</h4>
-  <select multiple="multiple" class="form-control" id="select_orgs2" data-name="Organzations" data-label="" data-search-placeholder="" data-search-style="" data-search-extra-attrs="title" data-label-style="" data-minimizable="" data-counter="" data-counter-style="background:lightgreen;">
+  <select multiple="multiple" class="form-control" id="select_orgs2" data-name="Organzations" data-label="" data-search-placeholder="" data-search-style="" data-search-extra-attrs="title" data-label-style="" data-minimizable="" data-counter="" data-counter-style="background:lightgreen;" 
+data-select-checkbox="" data-select-checkbox-style="background:gainsboro;">
       <option value="1">val 1</option>
       <option value="2">val 2</option>
       <option value="2">val 3</option>
@@ -82,6 +83,9 @@ const HTMLSearchableSelect = (function() {
                 this.minimizedHSSSelector = `#${this.minimizedHSSId}`;
 
 
+                this.selectAllId = `${this.id}_selectall`;
+                this.selectAllSelector = `#${this.selectAllId}`;
+                
 
 
                 this.hiddenClass = `${this.id}_hidden`;
@@ -100,6 +104,9 @@ const HTMLSearchableSelect = (function() {
                 this._counterStyle = select.attr('data-counter-style');
                 this._counter = select.attr('data-counter');
                 this._minimizable = select.attr('data-minimizable');
+                this._selectCheckbox = select.attr('data-select-checkbox');
+                this._selectCheckboxStyle = select.attr('data-select-checkbox-style');
+                this.selectChecked = false;
 
                 /* extra arg */
                 this._extraSearch = select.attr('data-search-extra-attrs');
@@ -145,6 +152,9 @@ const HTMLSearchableSelect = (function() {
             this.contStyle = this.getOptionalVal(this._contStyle, `background:lavender !important;`);
 
             this.counterStyle = this.getOptionalVal(this._counterStyle, '');
+            
+            
+            this.selectCheckboxStyle = this.getOptionalVal(this._selectCheckboxStyle, `background:gainsboro !important;`);
 
             /* 2options only attrs lower level programing */
             if (this._counter || typeof(this._counter) !== 'undefined') {
@@ -156,8 +166,8 @@ const HTMLSearchableSelect = (function() {
             if (this._minimizable || typeof(this._minimizable) !== 'undefined') {
                 this.minimizeBtn = `<i class="btn btn-sm btn-outline-light" style="font-size:0.725rem;padding:4px;" title="display minimized select" id="${this.miniId}">&#128229;</i>`;
                 this.minimizedHSS = `<div style="display:none;" id="${this.minimizedHSSContId}" class="p-0 m-0 w-100">
-              <button class="d-flex wrapper justify-content-between align-items-stretch w-100 btn btn-light text-white min_cont" id="${this.minContId}" title="display maximized select">
-                 <div class="min_content d-flex" id="${this.minimizedHSSId}"></div>
+              <button class="d-flex wrapper justify-content-between align-items-stretch w-100 btn btn-light text-white min_cont" type="button" id="${this.minContId}" title="display maximized select">
+                 <div class="min_content d-flex justify-content-between align-items-center flex-wrap" id="${this.minimizedHSSId}"></div>
                  <div class="btn btn-sm btn-outline-light" style="font-size:0.725rem;padding:4px;" >&#128228;</div>
               </button>
            </div>`;
@@ -168,13 +178,22 @@ const HTMLSearchableSelect = (function() {
                 this.minimizedHSS = '';
                 this.minimizeMr = '';
             }
-
+            
+            /* checkbox to Select/unselect all select items (optional controll to edit select element) */
+            if (this._selectCheckbox || typeof(this._selectCheckbox) !== 'undefined') {
+                this.selectCheckbox = `<div class="m-0 p-1 d-flex justify-content-center align-items-center" style="${this.selectCheckboxStyle}">
+                    <input type="checkbox" class="select_all" id="${this.selectAllId}" title="toggle between 'check all options' and 'uncheck all options.' " />
+                    </div>`;
+            } else {
+                this.selectCheckbox = '';
+            }
 
             /* optional create html label if user set data-label with value */
             let labelStr = this.label || this.name;
             labelStr = (labelStr) ? ` ${labelStr}` : '';
             this.labelHTML = this.getOptionalVal(this.label, `Select${labelStr}:`, (val) => {
-                return `<div class="col-sm-12 m-0 p-0" style="position:relative;"><label style="${this.labelStyle}">${val}</label>${this.counter}</div>`
+                return `<div class="col-sm-12 m-0 p-0" style="position:relative;">
+                <label style="${this.labelStyle}">${val}</label>${this.counter}</div>`
             });
 
             /* extra search attrs example value, txt and another attrs such as title, name, data-title etc so extend search functionalty using this attr */
@@ -199,6 +218,14 @@ const HTMLSearchableSelect = (function() {
                     this.maximize();
                 });
             }
+            
+            /* toggle between select all checkboxes and unselect all */
+            if ($(this.selectAllSelector).length) {
+                $(this.selectAllSelector).on('change.hss', () => {
+                    this.toggleSelect();
+                });
+            }
+            
 
             /* select change (select element in state change not removed like the search input (show or hide select not removed so here off prev event) */
             if (this.select.length) {
@@ -217,6 +244,7 @@ const HTMLSearchableSelect = (function() {
                 ${this.minimizedHSS} <!-- optional minimizedHSS -->
                 <div class="col-sm-12 row m-0 p-0 minimize_target">
                     <div class="col-sm-12 m-0 p-0 d-flex">
+                        ${this.selectCheckbox}
                         <input type="text" class="form-control ${this.minimizeMr}" id="${this.searchId}" placeholder="${this.searchPlaceholder}" style="${this.searchStyle}" />
                         <!-- optional minimizeBtn -->
                         ${this.minimizeBtn}
@@ -252,6 +280,16 @@ const HTMLSearchableSelect = (function() {
         maximize() {
             $(this.minimizedHSSContSelector).hide();
             this.hss.find('.minimize_target').show();
+        }
+        toggleSelect() {
+
+            if (this.selectChecked) {
+                this.select.find('option:selected').prop('selected', false).end().trigger('change');
+                this.selectChecked = false;
+            } else {
+                this.select.find('option').prop('selected', true).end().trigger('change');
+                this.selectChecked = true;
+            }
         }
         search() {
             console.log('search', this, 'extra attrs foucses:', this.extraSearch);
@@ -314,7 +352,7 @@ const HTMLSearchableSelect = (function() {
                 if ($(this.minimizedHSSSelector).length) {
                     let miniHTML = '';
                     this.select.find('option:selected').each((_i, opt) => {
-                        miniHTML += `<div title="${$(opt).val()}" class="badge btn-outline-secondary border border-dark d-flex justify-content-center align-items-center mr-1">${$(opt).text()}</div>`;
+                        miniHTML += `<div title="${$(opt).val()}: ${$(opt).text()}" class="badge btn-outline-secondary border border-dark d-flex justify-content-center align-items-center mr-1" style="max-width:15vw !important;overflow:hidden">${$(opt).text()}</div>`;
                     });
                     $(this.minimizedHSSSelector).html(miniHTML);
                 }
