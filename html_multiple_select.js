@@ -119,8 +119,8 @@ const HTMLSearchableSelect = (function() {
             if (this._minimizable || typeof(this._minimizable) !== 'undefined') {
                 this.minimizeBtn = `<i class="btn btn-sm btn-outline-light" style="font-size:0.725rem;padding:4px;" title="display minimized select" id="${this.miniId}">&#128229;</i>`;
                 this.minimizedHSS = `<div style="display:none;" id="${this.minimizedHSSContId}" class="p-0 m-0 w-100">
-              <button class="d-flex wrapper justify-content-between align-items-stretch w-100 btn btn-light text-white min_cont" id="${this.minContId}" title="display maximized select">
-                 <div class="min_content d-flex" id="${this.minimizedHSSId}"></div>
+              <button class="d-flex wrapper justify-content-between align-items-stretch w-100 btn btn-light text-white min_cont" type="button" id="${this.minContId}" title="display maximized select">
+                 <div class="min_content d-flex justify-content-between align-items-center flex-wrap" id="${this.minimizedHSSId}"></div>
                  <div class="btn btn-sm btn-outline-light" style="font-size:0.725rem;padding:4px;" >&#128228;</div>
               </button>
            </div>`;
@@ -137,7 +137,8 @@ const HTMLSearchableSelect = (function() {
             let labelStr = this.label || this.name;
             labelStr = (labelStr) ? ` ${labelStr}` : '';
             this.labelHTML = this.getOptionalVal(this.label, `Select${labelStr}:`, (val) => {
-                return `<div class="col-sm-12 m-0 p-0" style="position:relative;"><label style="${this.labelStyle}">${val}</label>${this.counter}</div>`
+                return `<div class="col-sm-12 m-0 p-0" style="position:relative;">
+                <label style="${this.labelStyle}">${val}</label>${this.counter}</div>`
             });
 
             /* extra search attrs example value, txt and another attrs such as title, name, data-title etc so extend search functionalty using this attr */
@@ -277,7 +278,7 @@ const HTMLSearchableSelect = (function() {
                 if ($(this.minimizedHSSSelector).length) {
                     let miniHTML = '';
                     this.select.find('option:selected').each((_i, opt) => {
-                        miniHTML += `<div title="${$(opt).val()}" class="badge btn-outline-secondary border border-dark d-flex justify-content-center align-items-center mr-1">${$(opt).text()}</div>`;
+                        miniHTML += `<div title="${$(opt).val()}: ${$(opt).text()}" class="badge btn-outline-secondary border border-dark d-flex justify-content-center align-items-center mr-1" style="max-width:15vw !important;overflow:hidden">${$(opt).text()}</div>`;
                     });
                     $(this.minimizedHSSSelector).html(miniHTML);
                 }
